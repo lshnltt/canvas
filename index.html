@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html style="font-size: 12px;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=yes, width=device-width">
+    <meta name="format-detection" content="telephone=no">
+    <title>集合报价</title>
+    <!-- <script src="static/appBridge.js"></script> -->
+    <style>
+      html, body {
+        padding: 0px;
+        margin: 0px;
+        overflow-x: hidden;
+      }
+      #app {
+        width: 100%;
+        display: flex;
+      }
+      #app > .app {
+        height: 300px;
+        width: 100%;
+        flex-shrink: 0;
+      }
+      .swipe-transition {
+        transition: transform 150ms ease-in-out;
+      }
+      #name {
+        border-color: red;
+      }
+      #richEditor {
+        height: 300px;
+      }
+    </style>
+  <body>
+
+    <!-- <div id="app">
+      <div class="app">test1</div>
+      <div class="app">test2</div>
+      <div class="app">test3</div>
+    </div>
+    <input id="name">
+    <select id="names">
+
+    </select>
+    <button value="添加" id="addBtn">添加</button>
+    <button value="清空" id="clearBtn">清空</button>
+    <div contenteditable="true" id="richEditor"></div>
+    <button value="加粗" id="boldBtn">加粗</button>
+    <button value="斜体" id="italicBtn">斜体</button> -->
+    <canvas id="drawing" width="400" height="400" style="background-color: antiquewhite;">A drawing of something.</canvas>
+    <script type="text/javascript">
+      let names = ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+          startTime = new Date().getTime(),
+          currTime = 0,
+          count = 0,
+          _timeout = null
+      let handler = function () {
+          currTime = new Date().getTime()
+          let offsetTime = currTime - (startTime + count * 1000)
+          offsetTime = offsetTime > 1000 ? 1000 : offsetTime
+          let roundTime = 1000 - offsetTime
+          let canvas = document.getElementById('drawing')
+          drawClock(canvas)
+          _timeout = setTimeout(handler, roundTime)
+      }
+      window.addEventListener('load', function(){
+          handler()
+      })
+      function drawClock (canvas) {
+        if (canvas.getContext) {
+          let context = drawing.getContext('2d')
+          let origin = {x: 200, y: 200}
+          let radius = 100
+          context.save()
+          context.clearRect(0,0, 400, 400)
+          context.beginPath()
+          //画中心圆饼
+          context.arc(origin.x, origin.y, 2, 0, 2 * Math.PI, false)
+          context.fill()
+          //画表盘
+          context.moveTo(origin.x + radius, origin.y)
+          context.arc(origin.x, origin.y, radius, 0, 2 * Math.PI, false)
+          context.translate(origin.x, origin.y)
+          //画时针、分针、秒针
+          drawHourMinuteSecond(context)
+          //画数字
+          drawNumber(context)
+          //画分针秒针指示线
+          drawIndicatrix(context, radius)
+          //还原画布原点
+          context.restore()
+          context.stroke()
+          count++
+        }
+      }
+      function drawHourMinuteSecond (context) {
+        let hourLen = 35,
+            minuteLen = 60,
+            secondLen = 80,
+            angle = getTimeAngle()
+        context.moveTo(0, 0)
+        //时针
+        context.lineTo(Math.sin(angle.hour) * hourLen, -Math.cos(angle.hour) * hourLen)
+        context.moveTo(0, 0)
+        //分针
+        context.lineTo(Math.sin(angle.minute) * minuteLen, -Math.cos(angle.minute) * minuteLen)
+        context.moveTo(0, 0)
+        //秒针
+        context.lineTo(Math.sin(angle.second) * secondLen, -Math.cos(angle.second) * secondLen)
+      }
+      function drawNumber(context) {
+        let fontToOrigin = 90
+        for (let i = 0; i < 12; i++) {
+          let num = i ? i : 12
+          let angle = (i % 12) / 12 * 2 * Math.PI
+          context.font = 'bold 14px arial'
+          context.textAlign = 'center'
+          context.textBaseline = 'middle'
+          context.fillText(num, Math.sin(angle) * fontToOrigin, -Math.cos(angle) * fontToOrigin)
+        }
+      }
+      function drawIndicatrix(context, radius) {
+        let normalLine = 5
+            longerLine = 8
+        for (let i = 0; i < 60; i++) {
+          angle = (i % 60) / 60 * 2 * Math.PI
+          context.moveTo(Math.sin(angle) * radius, -Math.cos(angle) * radius)
+          if (angle % 3 !== 0 && angle % 5 !== 0) {
+            context.lineTo(Math.sin(angle) * (radius - normalLine), -Math.cos(angle) * (radius - normalLine))
+          } else if (angle % 5 === 0) {
+            context.lineTo(Math.sin(angle) * (radius - longerLine), -Math.cos(angle) * (radius - longerLine))
+          } 
+        }
+
+      }
+      function getTimeAngle () {
+        let date = new Date()
+            hour = date.getHours() % 12,
+            minute = date.getMinutes(),
+            seconds = date.getSeconds(),
+            secondAngle = (seconds / 60) * 2 * Math.PI,
+            minuteAngle = (minute / 60) * 2 * Math.PI + seconds / 3600 * 2 * Math.PI,
+            hourAngle = (hour / 12) * 2 * Math.PI + minute / 24 / 60 * 2 * Math.PI
+        return {
+          hour: hourAngle,
+          minute: minuteAngle,
+          second: secondAngle
+        }
+      }
+    </script>
+  </body>
+</html>
